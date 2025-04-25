@@ -1,0 +1,14 @@
+
+body {
+  font-family: sans-serif;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background: #fafafa;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 15px;
+}

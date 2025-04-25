@@ -1,0 +1,122 @@
+.snake-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.game-header h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.score {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.difficulty-controls {
+  margin-bottom: 20px;
+}
+
+.difficulty-controls button {
+  margin: 0 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #95a5a6;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.difficulty-controls button.active {
+  background-color: #2ecc71;
+}
+
+.difficulty-controls button:hover {
+  background-color: #27ae60;
+}
+
+.game-board {
+  position: relative;
+  background-color: #fff;
+  border: 2px solid #34495e;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.snake-segment {
+  position: absolute;
+  background-color: #2ecc71;
+  border-radius: 4px;
+}
+
+.snake-segment:first-child {
+  background-color: #27ae60;
+}
+
+.food {
+  position: absolute;
+  background-color: #e74c3c;
+  border-radius: 50%;
+}
+
+.game-controls {
+  margin-top: 20px;
+}
+
+.game-controls button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.game-controls button:hover {
+  background-color: #2980b9;
+}
+
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.game-over h2 {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .game-board {
+    max-width: 90vw;
+    max-height: 90vw;
+  }
+  
+  .difficulty-controls button {
+    margin: 5px;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+} 

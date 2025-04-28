@@ -19,7 +19,7 @@ const MemoryDashboard: React.FC = () => {
     const loadGameData = async () => {
       try {
         // Load game stats
-        const gameStats = await gameStatsApi.getGameStats('cardflip');
+        const gameStats = await gameStatsApi.getGameStats('cardFlip');
         setGameHistory(gameStats.gameHistory);
 
         // Calculate stats
@@ -93,7 +93,7 @@ const MemoryDashboard: React.FC = () => {
         <div className="recent-games">
           <h2>Game History</h2>
           <GameHistory 
-            gameName="cardflip" 
+            gameName="cardFlip" 
             history={gameHistory} 
             onClose={() => {}} 
           />

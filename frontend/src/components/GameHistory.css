@@ -1,0 +1,132 @@
+.history-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.history-content {
+  background-color: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.game-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.game-icon {
+  font-size: 1.5rem;
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.5rem;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.history-body {
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 70px);
+}
+
+.no-history {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.history-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tr.won {
+  background-color: #e8f5e9;
+}
+
+.history-table tr.lost {
+  background-color: #ffebee;
+}
+
+.game-result {
+  font-weight: bold;
+}
+
+tr.won .game-result {
+  color: #2e7d32;
+}
+
+tr.lost .game-result {
+  color: #c62828;
+}
+
+@media (max-width: 768px) {
+  .history-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .history-header h2 {
+    font-size: 1.2rem;
+  }
+} 

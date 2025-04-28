@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Card from "../components/card";
 import Modal from "../components/Modal";
 import "../App.css";
+import { gameStatsApi } from '../api/gameStats';
 
 const emojis = ["🍕", "🍔", "🍟", "🌮", "🍣", "🍩"];
 const shuffled = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
@@ -44,7 +45,7 @@ const GamePage: React.FC = () => {
     setCards(initialized);
   }, []);
 
-  const saveGameResult = (won: boolean) => {
+  const saveGameResult = async (won: boolean) => {
     const result: GameResult = {
       date: new Date().toLocaleString(),
       score,
@@ -57,6 +58,18 @@ const GamePage: React.FC = () => {
     const gameHistory = savedHistory ? JSON.parse(savedHistory) : [];
     const updatedHistory = [result, ...gameHistory];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
+
+    try {
+      await gameStatsApi.saveGameResult({
+        gameName: 'cardFlip',
+        score: score,
+        moves: leftAttempts,
+        won: won,
+        difficulty: 'medium'
+      });
+    } catch (error) {
+      console.error('Failed to save game result:', error);
+    }
   };
 
   useEffect(() => {
@@ -122,6 +135,15 @@ const GamePage: React.FC = () => {
           setLock(false);
         }, 1000);
       }
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const stats = await gameStatsApi.getGameStats('cardFlip');
+      console.log('Game stats:', stats);
+    } catch (error) {
+      console.error('Failed to load game stats:', error);
     }
   };
 

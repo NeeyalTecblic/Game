@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { gameStatsApi, GameHistory as GameHistoryType } from '../api/gameStats';
+import GameHistory from '../components/GameHistory';
 import './GameDashboard.css';
-
-interface GameResult {
-  date: string;
-  score: number;
-  won: boolean;
-  difficulty?: string;
-}
 
 const SnakeDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [gameHistory, setGameHistory] = useState<GameResult[]>([]);
+  const [gameHistory, setGameHistory] = useState<GameHistoryType[]>([]);
   const [highScore, setHighScore] = useState<number>(0);
   const [stats, setStats] = useState({
     totalGames: 0,
@@ -22,30 +17,37 @@ const SnakeDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    const history = JSON.parse(localStorage.getItem('snakeGameHistory') || '[]');
-    const scores = JSON.parse(localStorage.getItem('gameScores') || '{}');
-    
-    setGameHistory(history);
-    setHighScore(scores.snake || 0);
+    const loadGameData = async () => {
+      try {
+        // Load game stats
+        const gameStats = await gameStatsApi.getGameStats('snake');
+        setGameHistory(gameStats.gameHistory);
+        
+        // Load best scores
+        const bestScores = await gameStatsApi.getBestScores();
+        setHighScore(bestScores.snake || 0);
 
-    // Calculate stats
-    const totalGames = history.length;
-    const totalScore = history.reduce((sum: number, game: GameResult) => sum + game.score, 0);
-    
-    const difficultyScores = history.reduce((acc: any, game: GameResult) => {
-      if (game.difficulty) {
-        acc[game.difficulty] = Math.max(acc[game.difficulty], game.score);
+        // Calculate difficulty-specific stats
+        const difficultyScores = gameStats.gameHistory.reduce((acc: any, game: GameHistoryType) => {
+          if (game.difficulty) {
+            acc[game.difficulty] = Math.max(acc[game.difficulty] || 0, game.score);
+          }
+          return acc;
+        }, { easy: 0, medium: 0, hard: 0 });
+
+        setStats({
+          totalGames: gameStats.gamesPlayed,
+          averageScore: gameStats.averageScore,
+          highScoreEasy: difficultyScores.easy,
+          highScoreMedium: difficultyScores.medium,
+          highScoreHard: difficultyScores.hard,
+        });
+      } catch (error) {
+        console.error('Failed to load game data:', error);
       }
-      return acc;
-    }, { easy: 0, medium: 0, hard: 0 });
+    };
 
-    setStats({
-      totalGames,
-      averageScore: totalGames ? Math.round(totalScore / totalGames) : 0,
-      highScoreEasy: difficultyScores.easy,
-      highScoreMedium: difficultyScores.medium,
-      highScoreHard: difficultyScores.hard,
-    });
+    loadGameData();
   }, []);
 
   return (
@@ -95,29 +97,12 @@ const SnakeDashboard: React.FC = () => {
         </div>
 
         <div className="recent-games">
-          <h2>Recent Games</h2>
-          <div className="games-table-container">
-            <table className="games-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Score</th>
-                  <th>Difficulty</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gameHistory.map((game, index) => (
-                  <tr key={index} className={game.won ? 'highlight' : ''}>
-                    <td>{game.date}</td>
-                    <td>{game.score}</td>
-                    <td>{game.difficulty || 'Easy'}</td>
-                    <td>{game.won ? '🏆 High Score!' : 'Game Over'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h2>Game History</h2>
+          <GameHistory 
+            gameName="snake" 
+            history={gameHistory} 
+            onClose={() => {}} 
+          />
         </div>
       </div>
     </div>

@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserGames } from '../api';
+import { gameStatsApi, GameHistory as GameHistoryType } from '../api/gameStats';
+import GameHistory from '../components/GameHistory';
 import './GameDashboard.css';
-
-interface GameResult {
-  date: string;
-  winner: string;
-  moves: number;
-}
 
 const TicTacToeDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [gameHistory, setGameHistory] = useState<GameResult[]>([]);
+  const [gameHistory, setGameHistory] = useState<GameHistoryType[]>([]);
   const [stats, setStats] = useState({
     totalGames: 0,
     playerWins: 0,
@@ -22,30 +17,33 @@ const TicTacToeDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    async function fetchHistory() {
-      const games = await getUserGames();
-      const tttGames = games.filter((g: any) => g.gameName === 'tictactoe');
-      setGameHistory(tttGames.map((g: any) => ({
-        date: new Date(g.createdAt).toLocaleString(),
-        winner: g.data?.winner || '',
-        moves: g.score || 0
-      })));
-      // Calculate stats
-      const totalGames = tttGames.length;
-      const playerWins = tttGames.filter((g: any) => g.data?.winner === 'Player').length;
-      const computerWins = tttGames.filter((g: any) => g.data?.winner === 'Computer').length;
-      const draws = tttGames.filter((g: any) => g.data?.winner === 'Draw').length;
-      const totalMoves = tttGames.reduce((sum: number, g: any) => sum + (g.score || 0), 0);
-      setStats({
-        totalGames,
-        playerWins,
-        computerWins,
-        draws,
-        winRate: totalGames ? Math.round((playerWins / totalGames) * 100) : 0,
-        averageMoves: totalGames ? Math.round(totalMoves / totalGames) : 0,
-      });
-    }
-    fetchHistory();
+    const loadGameData = async () => {
+      try {
+        // Load game stats
+        const gameStats = await gameStatsApi.getGameStats('tictactoe');
+        setGameHistory(gameStats.gameHistory);
+
+        // Calculate stats
+        const totalGames = gameStats.gamesPlayed;
+        const playerWins = gameStats.gameHistory.filter(g => g.won).length;
+        const computerWins = gameStats.gameHistory.filter(g => !g.won && g.score > 0).length;
+        const draws = gameStats.gameHistory.filter(g => !g.won && g.score === 0).length;
+        const totalMoves = gameStats.gameHistory.reduce((sum, g) => sum + (g.moves || 0), 0);
+
+        setStats({
+          totalGames,
+          playerWins,
+          computerWins,
+          draws,
+          winRate: totalGames ? Math.round((playerWins / totalGames) * 100) : 0,
+          averageMoves: totalGames ? Math.round(totalMoves / totalGames) : 0,
+        });
+      } catch (error) {
+        console.error('Failed to load game data:', error);
+      }
+    };
+
+    loadGameData();
   }, []);
 
   return (
@@ -101,27 +99,12 @@ const TicTacToeDashboard: React.FC = () => {
         </div>
 
         <div className="recent-games">
-          <h2>Recent Games</h2>
-          <div className="games-table-container">
-            <table className="games-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Winner</th>
-                  <th>Moves</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gameHistory.map((game, index) => (
-                  <tr key={index} className={game.winner === 'Player' ? 'highlight' : ''}>
-                    <td>{game.date}</td>
-                    <td>{game.winner}</td>
-                    <td>{game.moves}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h2>Game History</h2>
+          <GameHistory 
+            gameName="tictactoe" 
+            history={gameHistory} 
+            onClose={() => {}} 
+          />
         </div>
       </div>
     </div>

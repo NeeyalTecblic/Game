@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserGames } from '../api';
+import { gameStatsApi, GameHistory as GameHistoryType } from '../api/gameStats';
+import GameHistory from '../components/GameHistory';
 import './GameDashboard.css';
-
-interface GameResult {
-  date: string;
-  score: number;
-  totalPairs?: number;
-  attemptsLeft?: number;
-  won?: boolean;
-}
 
 const MemoryDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [gameHistory, setGameHistory] = useState<GameResult[]>([]);
+  const [gameHistory, setGameHistory] = useState<GameHistoryType[]>([]);
   const [stats, setStats] = useState({
     totalGames: 0,
     gamesWon: 0,
@@ -23,29 +16,31 @@ const MemoryDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    async function fetchHistory() {
-      const games = await getUserGames();
-      // Filter for flipcard games
-      const memoryGames = games.filter((g: any) => g.gameName === 'flipcard');
-      setGameHistory(memoryGames.map((g: any) => ({
-        date: new Date(g.createdAt).toLocaleString(),
-        score: g.score,
-        won: g.status === 'finished',
-      })));
-      // Calculate stats
-      const totalGames = memoryGames.length;
-      const gamesWon = memoryGames.filter((g: any) => g.status === 'finished').length;
-      const bestScore = memoryGames.reduce((max: number, g: any) => g.score > max ? g.score : max, 0);
-      const totalScore = memoryGames.reduce((sum: number, g: any) => sum + (g.score || 0), 0);
-      setStats({
-        totalGames,
-        gamesWon,
-        bestScore,
-        winRate: totalGames ? Math.round((gamesWon / totalGames) * 100) : 0,
-        averageScore: totalGames ? Math.round(totalScore / totalGames) : 0,
-      });
-    }
-    fetchHistory();
+    const loadGameData = async () => {
+      try {
+        // Load game stats
+        const gameStats = await gameStatsApi.getGameStats('cardflip');
+        setGameHistory(gameStats.gameHistory);
+
+        // Calculate stats
+        const totalGames = gameStats.gamesPlayed;
+        const gamesWon = gameStats.gameHistory.filter(g => g.won).length;
+        const bestScore = Math.max(...gameStats.gameHistory.map(g => g.score));
+        const totalScore = gameStats.gameHistory.reduce((sum, g) => sum + g.score, 0);
+
+        setStats({
+          totalGames,
+          gamesWon,
+          bestScore,
+          winRate: totalGames ? Math.round((gamesWon / totalGames) * 100) : 0,
+          averageScore: totalGames ? Math.round(totalScore / totalGames) : 0,
+        });
+      } catch (error) {
+        console.error('Failed to load game data:', error);
+      }
+    };
+
+    loadGameData();
   }, []);
 
   return (
@@ -96,27 +91,12 @@ const MemoryDashboard: React.FC = () => {
         </div>
 
         <div className="recent-games">
-          <h2>Recent Games</h2>
-          <div className="games-table-container">
-            <table className="games-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Score</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gameHistory.map((game, index) => (
-                  <tr key={index} className={game.won ? 'highlight' : ''}>
-                    <td>{game.date}</td>
-                    <td>{game.score}</td>
-                    <td>{game.won ? '🎉 Won!' : '❌ Lost'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h2>Game History</h2>
+          <GameHistory 
+            gameName="cardflip" 
+            history={gameHistory} 
+            onClose={() => {}} 
+          />
         </div>
       </div>
     </div>

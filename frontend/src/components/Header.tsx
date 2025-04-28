@@ -46,13 +46,17 @@ const Header: React.FC = () => {
               </button>
               
               {isUserMenuOpen && (
-                <div className="user-menu">
+                <div className="user-menu" style={{ zIndex: 1000 }}>
                   <div className="menu-header">
                     <span className="user-info">Signed in as</span>
                     <strong>{user.username}</strong>
                   </div>
                   <div className="menu-divider" />
-                  <button className="menu-item" onClick={handleLogout}>
+                  <button 
+                    className="menu-item" 
+                    onClick={handleLogout}
+                    style={{ cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                  >
                     Sign Out
                   </button>
                 </div>
